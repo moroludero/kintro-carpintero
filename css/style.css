@@ -16,6 +16,10 @@
 
 html { scroll-behavior: smooth; }
 
+#inicio, #trabajos, #galeria, #nosotros, #contacto {
+  scroll-margin-top: 64px;
+}
+
 body {
   margin: 0;
   font-family: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -53,7 +57,8 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
+  gap: 10px;
+  padding: 12px 16px;
   max-width: 1120px;
   margin: 0 auto;
 }
@@ -61,17 +66,19 @@ header {
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-family: Georgia, serif;
   font-size: 1.3rem;
   font-weight: bold;
   color: var(--wood-dark);
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .brand .mark {
   width: 36px;
   height: 36px;
+  flex: none;
   border-radius: 50%;
   background: var(--wood);
   color: var(--cream);
@@ -430,6 +437,13 @@ header {
   color: #d8c9b8;
 }
 
+.contact-info a {
+  color: #d8c9b8;
+  text-decoration: none;
+}
+
+.contact-info a:hover { color: var(--cream); text-decoration: underline; }
+
 /* Footer */
 footer {
   padding: 28px 0;
@@ -472,9 +486,66 @@ footer {
     padding: 16px 20px;
     gap: 14px;
     border-bottom: 1px solid var(--cream-dim);
+    box-shadow: var(--shadow);
   }
-  .stats { grid-template-columns: 1fr; }
+  .nav-cta { padding: 8px 14px; font-size: 0.85rem; }
+  .brand { font-size: 1.05rem; }
+  .brand .mark { width: 30px; height: 30px; font-size: 0.95rem; }
+
+  .hero { padding: 32px 0 40px; }
+  .hero-inner { gap: 24px; }
+  .hero-photo { order: -1; aspect-ratio: 16 / 10; }
+  .hero-actions .btn { flex: 1 1 auto; justify-content: center; }
+
+  .section { padding: 40px 0; }
+  .section-head { margin-bottom: 24px; }
+
+  .stats { grid-template-columns: 1fr; margin-top: 28px; }
+
+  .categories { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .category-card .info { padding: 10px 12px; }
+  .category-card h3 { font-size: 0.95rem; }
+  .category-card .count { font-size: 0.78rem; }
+
+  /* Filtros como carrusel horizontal en vez de envolver en varias filas */
+  .filters {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+    margin: 0 -16px 20px;
+    padding-left: 16px;
+    padding-right: 16px;
+    scrollbar-width: none;
+  }
+  .filters::-webkit-scrollbar { display: none; }
+  .filter-btn {
+    flex: none;
+    padding: 7px 14px;
+    font-size: 0.85rem;
+  }
+
+  /* Dos columnas en la galería para que se vea como catálogo, no una lista larga */
+  .gallery { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .gallery-item { border-radius: 6px; }
+
+  .about-grid { gap: 24px; }
+
   .contact-card { padding: 32px 20px; }
-  .lightbox-prev { left: 8px; }
-  .lightbox-next { right: 8px; }
+  .contact-actions .btn { width: 100%; justify-content: center; }
+  .contact-info { gap: 16px 24px; font-size: 0.88rem; }
+
+  .wa-float { width: 50px; height: 50px; font-size: 1.3rem; bottom: 14px; right: 14px; }
+
+  .lightbox { padding: 12px; }
+  .lightbox-prev { left: 4px; }
+  .lightbox-next { right: 4px; }
+  .lightbox-nav { width: 38px; height: 38px; font-size: 1.1rem; }
+  .lightbox-close { top: 10px; right: 10px; width: 38px; height: 38px; }
+}
+
+@media (max-width: 420px) {
+  .gallery { gap: 6px; }
+  .categories { grid-template-columns: 1fr; }
 }

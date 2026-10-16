@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kintro Carpintero — Muebles y carpintería a medida en Cancún</title>
+<meta name="description" content="Kintro Carpintero: cocinas integrales, closets, puertas y muebles a medida. Carpintería residencial en Cancún. Cotiza por WhatsApp.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪚</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <a href="#inicio" class="brand"><span class="mark">K</span> Kintro Carpintero</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#trabajos">Trabajos</a></li>
+      <li><a href="#galeria">Galería</a></li>
+      <li><a href="#nosotros">Nosotros</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <a class="nav-cta" id="navWa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
+  </nav>
+</header>
+
+<section class="hero" id="inicio">
+  <div class="container hero-inner">
+    <div class="hero-text">
+      <div class="eyebrow">Carpintería a medida · Cancún</div>
+      <h1>Muebles hechos a tu medida, con acabados que duran</h1>
+      <p>Cocinas integrales, closets, puertas y muebles sobre diseño. Confección de muebles con atención personal de principio a fin — del levantamiento de medidas a la instalación.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" id="heroWa" href="#" target="_blank" rel="noopener">📱 Cotizar por WhatsApp</a>
+        <a class="btn btn-secondary" href="#galeria">Ver trabajos realizados</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><strong>55+</strong><span>Fotos de proyectos reales</span></div>
+        <div class="stat"><strong>4</strong><span>Líneas de trabajo</span></div>
+        <div class="stat"><strong>100%</strong><span>Diseño a medida</span></div>
+      </div>
+    </div>
+    <div class="hero-photo">
+      <img src="images/cocinas-07.jpg" alt="Cocina integral de madera fabricada por Kintro Carpintero" loading="eager">
+    </div>
+  </div>
+</section>
+
+<section class="section" id="trabajos">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Lo que hacemos</div>
+      <h2>Líneas de trabajo</h2>
+      <p>Cada proyecto se diseña y fabrica a la medida exacta del espacio. Estas son las categorías de trabajo más solicitadas.</p>
+    </div>
+    <div class="categories" id="categoryGrid"></div>
+  </div>
+</section>
+
+<section class="section section-alt" id="galeria">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Portafolio</div>
+      <h2>Galería de proyectos</h2>
+      <p>Fotos reales de trabajos entregados. Toca cualquier imagen para verla en grande.</p>
+    </div>
+    <div class="filters" id="filterBar"></div>
+    <div class="gallery" id="galleryGrid"></div>
+  </div>
+</section>
+
+<section class="section" id="nosotros">
+  <div class="container about-grid">
+    <div class="about-photo">
+      <img src="images/muebles-03.jpg" alt="Mueble a medida fabricado por Kintro Carpintero" loading="lazy">
+    </div>
+    <div class="about-text">
+      <div class="eyebrow">Sobre Kintro Carpintero</div>
+      <h2>Confección de muebles, hecha por un carpintero local</h2>
+      <p>Kintro Carpintero, a cargo de Ramón M. Quintero, se dedica a la confección de muebles y carpintería residencial en Cancún: cocinas integrales, closets, puertas y piezas especiales sobre diseño.</p>
+      <ul>
+        <li>Levantamiento de medidas en sitio</li>
+        <li>Diseño a la medida del espacio y del presupuesto</li>
+        <li>Materiales y herrajes de calidad</li>
+        <li>Instalación incluida</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt" id="contacto">
+  <div class="container">
+    <div class="contact-card">
+      <h2>¿Tienes un proyecto en mente?</h2>
+      <p>Cuéntanos qué necesitas por WhatsApp — cocina, closet, puertas o un mueble especial — y te enviamos una cotización.</p>
+      <div class="contact-actions">
+        <a class="btn btn-primary" id="contactWa" href="#" target="_blank" rel="noopener">📱 Escribir por WhatsApp</a>
+      </div>
+      <div class="contact-info">
+        <span id="contactPhone1">📞 998 737 2869</span>
+        <span id="contactPhone2">📞 998 188 3210</span>
+        <span>📍 Cancún, Quintana Roo</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>Kintro Carpintero — Confección de muebles · Cancún, México</p>
+  </div>
+</footer>
+
+<a class="wa-float" id="floatWa" href="#" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">📱</a>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Cerrar">✕</button>
+  <button class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="Anterior">‹</button>
+  <img id="lightboxImg" src="" alt="">
+  <button class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Siguiente">›</button>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

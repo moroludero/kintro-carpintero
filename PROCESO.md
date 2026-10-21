@@ -148,6 +148,15 @@ de "Kintro" a "KinTro" (commit `a875e19`, editando `index.html`, `js/main.js` y
 minúsculas) se dejaron igual porque ya estaban compartidos como enlace de la página
 de Facebook. Es un cambio solo de texto/marca, sin tocar estructura ni estilos.
 
+## 12. Segundo cambio de marca: "Taller KinTro"
+
+La misma sesión hizo un segundo cambio de nombre, esta vez a "Taller KinTro"
+(commit `7ba8900`), en `index.html`, `js/main.js` y `README.md`, incluyendo la
+letra del logo circular (ahora "T"). Según ese mensaje, quien pidió el cambio en
+esa sesión fue "Monica". El repo y la URL en vivo (`kintro-carpintero`) se
+mantuvieron igual. Se verificó que el nombre quedó consistente en todos los
+archivos, sin rastros del nombre anterior.
+
 ## Estado final
 
 - **Sitio en vivo:** https://moroludero.github.io/kintro-carpintero/

@@ -4,28 +4,28 @@ const WHATSAPP_MESSAGE = "Hola, vi su catálogo y me interesa cotizar un proyect
 
 const CATEGORIES = [
   {
-    id: "muebles",
-    label: "Muebles a Medida",
-    description: "Tocadores, repisas y piezas especiales diseñadas para tu espacio.",
-    count: 19,
-  },
-  {
     id: "cocinas",
     label: "Cocinas Integrales",
     description: "Gabinetes, cubiertas e instalación completa de cocina.",
-    count: 14,
+    count: 20,
   },
   {
     id: "closets",
     label: "Closets y Vestidores",
     description: "Organización a medida: entrepaños, cajones y barras de ropa.",
-    count: 11,
+    count: 13,
+  },
+  {
+    id: "muebles",
+    label: "Muebles a Medida",
+    description: "Tocadores, repisas y piezas especiales diseñadas para tu espacio.",
+    count: 18,
   },
   {
     id: "puertas",
     label: "Puertas y Gabinetes",
     description: "Puertas corredizas, abatibles y gabinetes de carpintería fina.",
-    count: 11,
+    count: 4,
   },
 ];
 

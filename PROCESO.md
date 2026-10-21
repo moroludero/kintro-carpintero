@@ -193,6 +193,16 @@ diseño del resto del sitio (no debería romperse en móvil). No se pudo probar 
 vivo en el navegador porque estaba en uso por la otra sesión en ese momento; la
 otra sesión ya lo había probado en escritorio y móvil antes de publicar.
 
+## 15. Portada de la categoría "Muebles a Medida"
+
+El dueño pidió usar una foto específica (mueble de TV con los cajones abiertos)
+como portada de la tarjeta "Muebles a Medida", ya que la portada siempre sale de
+`<categoria>-01.jpg`. Esa foto ya estaba en el repo como `muebles-02.jpg`, así que
+la otra sesión intercambió el contenido de `muebles-01.jpg` y `muebles-02.jpg`
+(commit `109391c`), sin tocar conteos, HTML ni JS. Se verificó abriendo
+`muebles-01.jpg`: en efecto ahora es la foto del mueble de TV con los cajones y
+puertas abiertos.
+
 ## Estado final
 
 - **Sitio en vivo:** https://moroludero.github.io/kintro-carpintero/

@@ -286,6 +286,27 @@ header {
 .category-card h3 { font-size: 1.1rem; margin-bottom: 4px; }
 .category-card .count { color: var(--ink-soft); font-size: 0.85rem; }
 
+.custom-note {
+  margin-top: 28px;
+  background: #fff;
+  border: 2px dashed var(--wood);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.custom-note p {
+  margin: 0;
+  color: var(--ink-soft);
+  max-width: 60ch;
+}
+
+.custom-note strong { color: var(--wood-dark); }
+
 /* Gallery filters */
 .filters {
   display: flex;

@@ -31,7 +31,7 @@ const CATEGORIES = [
 
 // ---- WhatsApp links ----
 const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
-["navWa", "heroWa", "contactWa", "floatWa"].forEach((id) => {
+["navWa", "heroWa", "contactWa", "floatWa", "customWa"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) el.href = waLink;
 });

@@ -181,6 +181,18 @@ fotos usadas en el hero y la sección "Nosotros" (`cocinas-07.jpg`,
 `muebles-03.jpg`) siguen existiendo y correctamente categorizadas tras el
 reacomodo.
 
+## 14. Aviso de trabajos a medida fuera de catálogo
+
+La otra sesión agregó, debajo de las 4 tarjetas de categoría en "Líneas de
+trabajo", un recuadro con borde punteado aclarando que esas 4 categorías son solo
+las más pedidas y que Ramón también hace trabajos a la medida que no encajen en
+ninguna, con su propio botón de WhatsApp (`id="customWa"`, commit `0cedd26`). Se
+revisó el código: el botón quedó correctamente enlazado junto con los demás
+enlaces de WhatsApp en `main.js`, y el estilo nuevo usa las mismas variables de
+diseño del resto del sitio (no debería romperse en móvil). No se pudo probar en
+vivo en el navegador porque estaba en uso por la otra sesión en ese momento; la
+otra sesión ya lo había probado en escritorio y móvil antes de publicar.
+
 ## Estado final
 
 - **Sitio en vivo:** https://moroludero.github.io/kintro-carpintero/

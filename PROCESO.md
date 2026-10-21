@@ -157,6 +157,30 @@ esa sesión fue "Monica". El repo y la URL en vivo (`kintro-carpintero`) se
 mantuvieron igual. Se verificó que el nombre quedó consistente en todos los
 archivos, sin rastros del nombre anterior.
 
+## 13. Corrección de fotos mal categorizadas
+
+La clasificación original del paso 4 se hizo por bloques de hora de captura (fotos
+consecutivas asumidas del mismo proyecto), sin revisar cada imagen una por una —
+quedó anotado como aproximado en su momento. La otra sesión detectó que las 4
+categorías tenían fotos mezcladas entre sí y revisó visualmente las 55 imágenes una
+por una, reordenándolas y renumerándolas por contenido real (commit `5f96a8c`).
+
+Conteos finales reales por categoría:
+
+| Categoría              | Antes | Ahora |
+|--------------------------|------:|------:|
+| Cocinas Integrales        | 14 | 20 |
+| Closets y Vestidores      | 11 | 13 |
+| Muebles a Medida          | 19 | 18 |
+| Puertas y Gabinetes       | 11 |  4 |
+
+La mayoría de lo que estaba archivado como "puertas" en realidad eran cocinas,
+closets y muebles sueltos. Se verificó que los conteos en `js/main.js` coinciden
+exactamente con los archivos en `images/` (55 en total, sin pérdidas) y que las
+fotos usadas en el hero y la sección "Nosotros" (`cocinas-07.jpg`,
+`muebles-03.jpg`) siguen existiendo y correctamente categorizadas tras el
+reacomodo.
+
 ## Estado final
 
 - **Sitio en vivo:** https://moroludero.github.io/kintro-carpintero/

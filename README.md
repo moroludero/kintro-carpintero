@@ -1,7 +1,7 @@
-# KinTro Carpintero — Catálogo web
+# Taller KinTro — Catálogo web
 
 Sitio estático (HTML/CSS/JS puro, sin frameworks ni paso de build) con el catálogo
-de trabajos de KinTro Carpintero (Ramón M. Quintero).
+de trabajos de Taller KinTro (Ramón M. Quintero).
 
 ## Editar contenido
 
@@ -31,7 +31,7 @@ y visita `http://localhost:8000`.
    ```
    git init
    git add .
-   git commit -m "Catálogo KinTro Carpintero"
+   git commit -m "Catálogo Taller KinTro"
    git branch -M main
    git remote add origin https://github.com/<tu-usuario>/kintro-carpintero.git
    git push -u origin main

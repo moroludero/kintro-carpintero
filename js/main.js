@@ -44,7 +44,7 @@ CATEGORIES.forEach((cat) => {
     ALL_IMAGES.push({
       src: `images/${cat.id}-${num}.jpg`,
       category: cat.id,
-      alt: `${cat.label} — KinTro Carpintero, proyecto ${num}`,
+      alt: `${cat.label} — Taller KinTro, proyecto ${num}`,
     });
   }
 });

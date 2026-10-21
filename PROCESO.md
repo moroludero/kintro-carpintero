@@ -140,6 +140,14 @@ El usuario pidió eliminar el segundo teléfono (998 188 3210, leído de la foto
 tarjeta de presentación) y dejar únicamente el número que él mismo proporcionó por
 chat (998 737 2869). Se quitó de `index.html` y se publicó el cambio.
 
+## 11. Cambio de marca a "KinTro"
+
+Otra sesión de Claude, a pedido del usuario, cambió el nombre mostrado en el sitio
+de "Kintro" a "KinTro" (commit `a875e19`, editando `index.html`, `js/main.js` y
+`README.md`). El nombre del repositorio y la URL en vivo (`kintro-carpintero`, en
+minúsculas) se dejaron igual porque ya estaban compartidos como enlace de la página
+de Facebook. Es un cambio solo de texto/marca, sin tocar estructura ni estilos.
+
 ## Estado final
 
 - **Sitio en vivo:** https://moroludero.github.io/kintro-carpintero/

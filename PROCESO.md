@@ -203,13 +203,51 @@ la otra sesión intercambió el contenido de `muebles-01.jpg` y `muebles-02.jpg`
 `muebles-01.jpg`: en efecto ahora es la foto del mueble de TV con los cajones y
 puertas abiertos.
 
+## 16. Rediseño visual premium y selector de idioma ES/EN (2026-10-23/26)
+
+Monica pidió que el sitio se viera "stunning" pensando en usarlo como pieza de
+portafolio para su negocio de marketing digital (Moroludero Marketing Digital).
+Al comparar con `SoapCatalog` (que ya tenía un rediseño más pulido), se decidió
+una pasada de "premium polish" sobre la estructura existente, sin rehacerla:
+
+- Tipografía nueva: Fraunces (títulos) + Inter (cuerpo), vía Google Fonts.
+- Textura de grano sutil (misma técnica que `SoapCatalog`) para unificar el
+  "lenguaje visual" del portafolio entre los dos sitios.
+- Animaciones de aparición al hacer scroll (`IntersectionObserver` + clase
+  `.reveal`/`.in-view`), encabezado con blur y sombra al hacer scroll.
+- Reemplazo de todos los emoji (📱📞📍🛠️) por iconos SVG propios (sprite
+  `<symbol>` + `<use>`), insignia flotante sobre la foto del hero, tarjetas y
+  galería con hover de profundidad (sombra + zoom + overlay degradado).
+- Enlaces reales de Facebook/Instagram en el footer (antes el footer no tenía
+  redes sociales).
+- Se agregó un selector de idioma **ES/EN** en el nav (persistido en
+  `localStorage`), traduciendo todo el texto estático, las 4 categorías, el
+  texto alternativo de cada foto de galería, aria-labels, `<title>` y meta
+  description.
+
+Bug real encontrado y corregido durante las pruebas: al agregar el selector de
+idioma al nav, el botón de hamburguesa quedaba con ancho 0 en celular (todo el
+contenido del nav no cabía y el flex exprimía al elemento sin texto). Se
+corrigió haciendo que el botón de WhatsApp del nav sea solo-ícono en móvil.
+
+Verificado con capturas reales (Playwright + Edge local) en escritorio y
+celular, en ambos idiomas, sin errores de consola.
+
+## 17. Marca "TK" en el logo circular
+
+A pedido de Monica, el círculo del logo (antes mostraba solo "T") ahora
+muestra las iniciales **"TK"** (Taller KinTro), con el tamaño de letra
+ajustado para que quepan las dos.
+
 ## Estado final
 
 - **Sitio en vivo:** https://moroludero.github.io/kintro-carpintero/
 - **Repositorio:** https://github.com/moroludero/kintro-carpintero (público)
 - **Hosting:** GitHub Pages, gratuito de forma permanente
 - **Contacto activo en el sitio:** WhatsApp y teléfono 998 737 2869 únicamente
-- **Carpeta local del proyecto:** `C:\Users\morol\Documents\KintroCarpintero\`
+- **Carpeta local del proyecto:** `C:\Users\morol\OneDrive\Documents\KintroCarpintero\`
+- **Idiomas:** ES/EN, selector en el nav (persistido en `localStorage` como `lang-kintro`)
+- **Diseño:** rediseño premium (Fraunces/Inter, scroll-reveal, iconos SVG) — ver punto 16
 
 ## Cómo seguir editando
 

@@ -731,7 +731,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 .schedule-send { width: 100%; justify-content: center; margin-top: 4px; }
 
 .schedule-datetime-row { display: flex; gap: 10px; }
-.schedule-datetime-row input { flex: 1; min-width: 0; }
+.schedule-datetime-row input { flex: 1; min-width: 0; cursor: pointer; }
 
 .location-share { display: flex; flex-direction: column; gap: 6px; }
 

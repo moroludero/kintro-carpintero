@@ -57,7 +57,7 @@ const I18N = {
     ariaCategoryWa: "Agendar visita para cotizar",
     projectWord: "proyecto",
     scheduleTitle: "Agenda tu visita",
-    scheduleSub: "Cuéntanos qué necesitas, cuándo te queda bien y la dirección para ir a tomar medidas.",
+    scheduleSub: "Ramón va a tu domicilio a tomar las medidas exactas del espacio para armar tu cotización — dinos qué necesitas, cuándo te queda bien y la dirección.",
     scheduleCategoryLabel: "¿Qué te interesa cotizar?",
     scheduleCategoryOther: "Otro / trabajo a la medida",
     scheduleDateLabel: "Fecha y hora preferida para la visita",
@@ -130,7 +130,7 @@ const I18N = {
     ariaCategoryWa: "Schedule a visit to quote",
     projectWord: "project",
     scheduleTitle: "Schedule your visit",
-    scheduleSub: "Tell us what you need, when works for you, and the address to come take measurements.",
+    scheduleSub: "Ramón comes to your place to take exact measurements of the space to put together your quote — tell us what you need, when works for you, and the address.",
     scheduleCategoryLabel: "What would you like a quote for?",
     scheduleCategoryOther: "Other / custom work",
     scheduleDateLabel: "Preferred date and time for the visit",
@@ -355,7 +355,30 @@ function resetScheduleLocation() {
 
 function initScheduleModal() {
   renderScheduleCategoryOptions();
-  document.getElementById("scheduleDate").min = todayISO();
+  const dateField = document.getElementById("scheduleDate");
+  const timeField = document.getElementById("scheduleTime");
+  dateField.min = todayISO();
+  // Clicking anywhere on a native date/time field only opens the picker if
+  // you hit the tiny calendar/clock icon exactly — showPicker() makes the
+  // whole field open it, like a normal dropdown. Typing is blocked on
+  // purpose: Monica wants these picked from the calendar/clock UI only, not
+  // typed in free-form.
+  [dateField, timeField].forEach((field) => {
+    field.addEventListener("click", () => {
+      if (field.showPicker) {
+        try {
+          field.showPicker();
+        } catch (e) {
+          // ignore — falls back to native click-the-icon behavior
+        }
+      }
+    });
+    field.addEventListener("keydown", (e) => {
+      if (e.key === "Tab" || e.key === "Escape") return;
+      e.preventDefault();
+    });
+    field.addEventListener("paste", (e) => e.preventDefault());
+  });
   document.getElementById("scheduleClose").addEventListener("click", closeScheduleModal);
   document.getElementById("scheduleBackdrop").addEventListener("click", closeScheduleModal);
   document.getElementById("scheduleLocationBtn").addEventListener("click", requestScheduleLocation);

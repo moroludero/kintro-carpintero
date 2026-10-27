@@ -437,6 +437,41 @@ preferida para la visita: jueves, 5 de noviembre de 2026, 10:30 a.m.\nDirección
 para tomar medidas: Av. Tulum 123, SM 4, Cancún\nUbicación (Google Maps):
 https://www.google.com/maps?q=21.1748,-86.8467". Sin errores de consola.
 
+## 25. El campo de hora no abría el selector al tocar el campo (2026-10-27)
+
+Monica reportó que en el campo de hora del modal "Agenda tu visita" había
+que darle exactamente al icono del reloj para que se abriera el selector —
+tocar el resto del campo no hacía nada, lo cual era confuso. Es un
+comportamiento nativo de `<input type="time">`/`type="date">` en navegadores
+basados en Chromium: solo el icono abre el desplegable visual.
+
+Se agregó un listener de clic en los campos de fecha y hora que llama a
+`field.showPicker()` (con verificación de soporte y `try/catch` por si el
+navegador no lo soporta, en cuyo caso simplemente queda el comportamiento
+nativo de antes). Ahora tocar en cualquier parte del campo abre el selector,
+igual que un `<select>` normal. También se le agregó `cursor: pointer` a
+ambos campos para que se vean claramente interactivos.
+
+De paso, a pedido de Monica, se aclaró el texto de introducción del modal
+(`scheduleSub`) para dejar explícito que la visita es para que Ramón tome las
+medidas exactas y pueda armar la cotización — antes solo decía "la dirección
+para ir a tomar medidas", sin conectarlo con el resultado (la cotización).
+
+Verificado con Playwright: el clic en el cuerpo del campo (no solo el icono)
+activa el campo y `showPicker()` se ejecuta sin errores; sin errores de
+consola nuevos.
+
+**Actualización (mismo día):** Monica aclaró que no quiere que se pueda
+escribir la fecha/hora a mano en absoluto — solo elegirlas del calendario u
+reloj visual. `readonly` no sirve para esto (en Chromium, un campo de
+fecha/hora `readonly` también deshabilita el selector visual, no solo el
+tecleo). Se bloqueó en su lugar el tecleo directamente: un listener de
+`keydown` en ambos campos cancela cualquier tecla excepto Tab/Escape (para no
+atrapar el foco), y un listener de `paste` bloquea pegar un valor. El clic
+para abrir el selector (`showPicker()`) se deja intacto. Verificado con
+Playwright: escribir una fecha/hora completa por teclado en ambos campos ya
+no cambia su valor (quedan vacíos), sin errores de consola.
+
 ## Estado final
 
 - **Sitio en vivo:** https://moroludero.github.io/kintro-carpintero/

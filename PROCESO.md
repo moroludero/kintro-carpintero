@@ -239,6 +239,124 @@ A pedido de Monica, el círculo del logo (antes mostraba solo "T") ahora
 muestra las iniciales **"TK"** (Taller KinTro), con el tamaño de letra
 ajustado para que quepan las dos.
 
+## 18. WhatsApp contextual por categoría (2026-10-26)
+
+A partir de una auditoría de sitios de la competencia (parte de una investigación
+de leads para Moroludero Marketing Digital), se detectó que cada tarjeta de
+categoría ("Cocinas Integrales", "Closets y Vestidores", etc.) solo llevaba a la
+galería filtrada, sin forma directa de cotizar esa línea específica por WhatsApp
+— a diferencia de `SoapCatalog`, que ya arma un mensaje distinto por producto.
+
+Se agregó un botón de WhatsApp propio en cada tarjeta de categoría (ícono
+circular verde, esquina superior derecha de la foto), con mensaje pre-llenado
+mencionando esa categoría exacta (ej. "...me interesa cotizar: Cocinas
+Integrales."), en `js/main.js` (`waLink(category)`, nuevas claves
+`waMessageCategory`/`ariaCategoryWa` en `I18N` ES/EN) y `css/style.css`
+(`.category-wa`). Verificado con Playwright en ambos idiomas, sin errores de
+consola.
+
+## 19. Corrección de color: botón "Preguntar por WhatsApp"
+
+Monica reportó que un botón que lleva a WhatsApp no tenía el color verde de
+WhatsApp. Se encontró el bug (preexistente, no introducido en este proyecto):
+el CTA `customWa` (dentro de la nota "¿No encuentras lo que buscas?") usaba la
+clase `btn-secondary` (contorno color madera) en vez de `btn-primary` (verde
+WhatsApp), pese a enlazar correctamente a WhatsApp. Se corrigió la clase en
+`index.html`. Se revisaron los otros 5 CTAs de WhatsApp del sitio (nav, hero,
+contacto, flotante, y el nuevo por categoría del punto 18) y ninguno tenía el
+mismo problema.
+
+## 20. Sección de Testimonios
+
+Se agregó una sección "Testimonios" (3 tarjetas con estrellas, cita y nombre)
+entre "Nosotros" y "Contacto", traducida en ES/EN (`testimoniosEyebrow`/
+`testimoniosTitle` en `js/main.js`, estilos `.testimonials`/`.testimonial-card`
+en `css/style.css`, nuevo ícono `#icon-star` en el sprite SVG).
+
+**Importante:** las 3 citas son contenido de muestra (a pedido explícito de
+Monica, solo para previsualizar el diseño) — no son reseñas reales de clientes.
+Cada tarjeta dice "Cliente de muestra — reemplazar antes de publicar" en el
+nombre, precisamente para que sea imposible confundirlas con testimonios
+genuinos si se suben así por accidente. **Pendiente:** reemplazar por 3 reseñas
+reales de Ramón antes de que esto se publique en serio.
+
+**Actualización (mismo día):** Monica pasó 4 reseñas reales de clientes de
+Ramón (exportadas de un chat de WhatsApp, con nombre, ciudad y calificación de
+cada una). Se reemplazaron las 3 tarjetas de muestra por las 4 reales: Daniela
+F. (cocina integral), Patricia L. (clóset a la medida), Jorge M. (gavetero) y
+Roberto C. (bar, 4 estrellas en vez de 5 — el motivo de la calificación quedó
+incluido en su propia cita). Como ya no eran 3 sino 4, se cambió
+`.testimonials` de `repeat(3, 1fr)` a `repeat(auto-fit, minmax(240px, 1fr))`
+para que se acomode bien sin importar cuántas reseñas haya, y se agregó el
+estilo `.icon.empty` para poder mostrar una estrella sin rellenar cuando la
+calificación no es de 5.
+
+Antes de aceptarlas se verificó que ninguna coincidiera con contenido inventado
+por Claude (al primer intento, Monica pegó sin querer las 3 citas de muestra
+tal cual, palabra por palabra — se detectó y se rechazó esa vez; esta segunda
+entrega sí trae nombres, ciudades y detalles específicos y consistentes con las
+categorías reales del catálogo).
+
+## 21. SEO y analítica
+
+Se encontró que el sitio no tenía: etiquetas Open Graph/Twitter Card (el link
+no mostraba foto/descripción al compartirse por WhatsApp o Facebook — el canal
+de ventas principal del negocio), datos estructurados para buscadores,
+`robots.txt`/`sitemap.xml`, ni ningún tipo de analítica de visitas. Se agregó:
+
+- **Open Graph / Twitter Card** en `<head>` (`og:title`, `og:description`,
+  `og:image` usando `images/cocinas-07.jpg`, `og:url`, `twitter:card`, etc.) —
+  para que el link se vea como catálogo real al compartirse.
+- **`<link rel="canonical">`** y **`<meta name="theme-color" content="#3b2a1f">`**
+  (antes solo lo tenía `SoapCatalog`).
+- **Datos estructurados JSON-LD** (`schema.org/HomeAndConstructionBusiness`) con
+  nombre, teléfono, dirección (Cancún, Quintana Roo, MX — mismo dato que ya
+  muestra el sitio en la sección de contacto, no es información nueva) y redes
+  sociales.
+- **`robots.txt`** y **`sitemap.xml`** en la raíz del proyecto.
+- **Analítica (GoatCounter)**, gratuita y sin cookies: el script ya está en el
+  sitio pero no cuenta nada todavía — **pendiente que Monica cree la cuenta
+  gratis en goatcounter.com con el código de sitio "taller-kintro"** (o cambiar
+  el código en `index.html` por el que elija). Verificado en local: el script
+  no cuenta en `localhost` por diseño propio de GoatCounter (warning esperado
+  en consola, no es un error).
+
+Todo verificado con Playwright en local: JSON-LD parsea como JSON válido,
+`robots.txt`/`sitemap.xml` se sirven correctamente, sin errores de consola.
+
+## 22. Sección de Instagram (feed en vivo, pendiente de activar)
+
+Monica pidió agregar lo que se vio en un sitio de la competencia (quererte.mx):
+mostrar las últimas fotos de Instagram directamente en el sitio, en vez de solo
+un ícono-link muerto en el footer. Se eligió el enfoque de widget automático de
+terceros (SnapWidget) sobre curar una mini-galería manual.
+
+Se agregó una sección "Instagram" nueva (entre Testimonios y Contacto) con:
+- El `<iframe>` de SnapWidget **comentado** dentro de `index.html`, con
+  instrucciones exactas de los 3 pasos para activarlo (crear cuenta gratis en
+  snapwidget.com, conectar @tallerkintro, pegar el iframe real reemplazando el
+  comentario).
+- Un botón de respaldo "Ver en Instagram" siempre visible mientras tanto, para
+  que la sección nunca se vea vacía o rota si se publica antes de activar el
+  feed.
+- Estilos `.instagram-embed`/`.instagram-fallback` en `css/style.css`, claves
+  `instagramEyebrow`/`instagramTitle`/`instagramCta` en ES/EN en `js/main.js`.
+
+**Bug real encontrado y corregido durante la verificación:** el comentario de
+instrucciones incluía literalmente las secuencias de apertura/cierre de
+comentario HTML como texto explicativo ("quitando las marcas de comentario...
+y ..."), lo cual cerraba el comentario antes de tiempo y dejaba un trozo de
+texto suelto visible en la página (confirmado con una captura real, no
+detectado solo leyendo el código). Se corrigió redactando las instrucciones
+sin usar esos símbolos literalmente. Verificado de nuevo con Playwright — para
+ver el cambio hubo que forzar la recarga sin caché del navegador
+(`?v=2` en la URL), ya que el navegador había cacheado la respuesta anterior
+del servidor local.
+
+**Pendiente:** crear la cuenta en snapwidget.com y pegar el iframe real para
+que el feed quede en vivo (ver instrucciones dentro del comentario en
+`index.html`).
+
 ## Estado final
 
 - **Sitio en vivo:** https://moroludero.github.io/kintro-carpintero/
@@ -248,6 +366,14 @@ ajustado para que quepan las dos.
 - **Carpeta local del proyecto:** `C:\Users\morol\OneDrive\Documents\KintroCarpintero\`
 - **Idiomas:** ES/EN, selector en el nav (persistido en `localStorage` como `lang-kintro`)
 - **Diseño:** rediseño premium (Fraunces/Inter, scroll-reveal, iconos SVG) — ver punto 16
+- **SEO/analítica:** Open Graph, JSON-LD, `robots.txt`/`sitemap.xml` listos — ver punto 21
+- **Cambios de esta sesión (2026-10-26) sin subir a GitHub todavía** (local únicamente, pendiente `git push` cuando Monica lo pida)
+
+## Pendientes
+
+- [ ] Crear la cuenta gratis en goatcounter.com (código de sitio "taller-kintro") para activar la analítica
+- [ ] Crear la cuenta gratis en snapwidget.com, conectar @tallerkintro, y pegar el iframe real en `index.html` (punto 22) para activar el feed de Instagram
+- [ ] `git push` de todos los cambios de esta sesión cuando Monica confirme
 
 ## Cómo seguir editando
 

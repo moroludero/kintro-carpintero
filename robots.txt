@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://moroludero.github.io/kintro-carpintero/sitemap.xml

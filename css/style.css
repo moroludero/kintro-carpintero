@@ -433,12 +433,37 @@ header.scrolled { box-shadow: var(--shadow-sm); }
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-  text-decoration: none;
-  color: inherit;
   transition: transform 0.35s var(--ease), box-shadow 0.35s ease;
 }
 
 .category-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+
+.category-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.category-wa {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--whatsapp);
+  color: #fff;
+  box-shadow: 0 6px 16px -4px rgba(37, 211, 102, 0.6);
+  transition: transform 0.2s var(--ease), background 0.2s ease;
+}
+
+.category-wa .icon { width: 1.05rem; height: 1.05rem; }
+
+.category-wa:hover { background: var(--whatsapp-dark); transform: scale(1.08); }
 
 .category-card .thumb {
   position: relative;
@@ -655,6 +680,52 @@ header.scrolled { box-shadow: var(--shadow-sm); }
   padding-left: 30px;
   position: relative;
 }
+
+/* Testimonials */
+.testimonials {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+.testimonial-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 26px 24px;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.testimonial-card .stars { display: flex; justify-content: center; gap: 2px; color: var(--accent); margin-bottom: 12px; }
+.testimonial-card .stars .icon { width: 1rem; height: 1rem; }
+.testimonial-card .stars .icon.empty { color: var(--border); }
+
+.testimonial-card .quote {
+  font-family: "Fraunces", serif;
+  font-style: italic;
+  color: var(--ink);
+  font-size: 1.02rem;
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+
+.testimonial-card .author { color: var(--wood-dark); font-weight: 600; font-size: 0.88rem; margin: 0; }
+
+@media (max-width: 760px) {
+  .testimonials { grid-template-columns: 1fr; gap: 18px; }
+}
+
+/* Instagram embed */
+.instagram-embed {
+  max-width: 680px;
+  margin: 0 auto;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.instagram-fallback { text-align: center; }
 
 .about-text li::before {
   content: "";

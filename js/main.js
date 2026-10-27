@@ -35,6 +35,11 @@ const I18N = {
     aboutLi2: "Diseño a la medida del espacio y del presupuesto",
     aboutLi3: "Materiales y herrajes de calidad",
     aboutLi4: "Instalación incluida",
+    testimoniosEyebrow: "Lo que dicen de nosotros",
+    testimoniosTitle: "Testimonios",
+    instagramEyebrow: "Síguenos",
+    instagramTitle: "Instagram",
+    instagramCta: "Ver en Instagram",
     contactTitle: "¿Tienes un proyecto en mente?",
     contactText: "Cuéntanos qué necesitas por WhatsApp — cocina, closet, puertas o un mueble especial — y te enviamos una cotización.",
     contactWa: "Escribir por WhatsApp",
@@ -49,6 +54,8 @@ const I18N = {
     pageTitle: "Taller KinTro — Muebles y carpintería a medida en Cancún",
     metaDesc: "Taller KinTro: cocinas integrales, closets, puertas y muebles a medida. Carpintería residencial en Cancún. Cotiza por WhatsApp.",
     waMessage: "Hola, vi su catálogo y me interesa cotizar un proyecto de carpintería.",
+    waMessageCategory: "Hola, vi su catálogo y me interesa cotizar: {category}.",
+    ariaCategoryWa: "Cotizar por WhatsApp",
     projectWord: "proyecto",
   },
   en: {
@@ -82,6 +89,11 @@ const I18N = {
     aboutLi2: "Design tailored to your space and budget",
     aboutLi3: "Quality materials and hardware",
     aboutLi4: "Installation included",
+    testimoniosEyebrow: "What our clients say",
+    testimoniosTitle: "Testimonials",
+    instagramEyebrow: "Follow us",
+    instagramTitle: "Instagram",
+    instagramCta: "View on Instagram",
     contactTitle: "Have a project in mind?",
     contactText: "Tell us what you need on WhatsApp — kitchen, closet, doors, or a special piece — and we'll send you a quote.",
     contactWa: "Message us on WhatsApp",
@@ -96,6 +108,8 @@ const I18N = {
     pageTitle: "Taller KinTro — Custom furniture and carpentry in Cancún",
     metaDesc: "Taller KinTro: custom kitchens, closets, doors, and furniture. Residential carpentry in Cancún. Get a quote on WhatsApp.",
     waMessage: "Hi, I saw your catalog and I'm interested in a quote for a carpentry project.",
+    waMessageCategory: "Hi, I saw your catalog and I'm interested in a quote for: {category}.",
+    ariaCategoryWa: "Get a quote on WhatsApp",
     projectWord: "project",
   },
 };
@@ -136,8 +150,9 @@ function catDesc(id) { return CATEGORY_I18N[id][currentLang].desc; }
 // ---- WhatsApp ----
 const WHATSAPP_NUMBER = "5219987372869"; // formato internacional sin '+' ni espacios
 
-function waLink() {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t("waMessage"))}`;
+function waLink(category) {
+  const msg = category ? t("waMessageCategory").replace("{category}", category) : t("waMessage");
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
 }
 
 function updateWaLinks() {
@@ -167,13 +182,18 @@ function renderCategoryCards() {
   categoryGrid.innerHTML = CATEGORIES.map((cat) => {
     const cover = `images/${cat.id}-01.jpg`;
     return `
-      <a class="category-card reveal" href="#galeria" data-filter-link="${cat.id}">
-        <div class="thumb"><img src="${cover}" alt="${catLabel(cat.id)}" loading="lazy"></div>
-        <div class="info">
-          <h3>${catLabel(cat.id)}</h3>
-          <p class="count">${catDesc(cat.id)}</p>
-        </div>
-      </a>`;
+      <div class="category-card reveal">
+        <a class="category-card-link" href="#galeria" data-filter-link="${cat.id}">
+          <div class="thumb"><img src="${cover}" alt="${catLabel(cat.id)}" loading="lazy"></div>
+          <div class="info">
+            <h3>${catLabel(cat.id)}</h3>
+            <p class="count">${catDesc(cat.id)}</p>
+          </div>
+        </a>
+        <a class="category-wa" href="${waLink(catLabel(cat.id))}" target="_blank" rel="noopener" aria-label="${t("ariaCategoryWa")}">
+          <svg class="icon"><use href="#icon-whatsapp"/></svg>
+        </a>
+      </div>`;
   }).join("");
 }
 
@@ -183,6 +203,9 @@ function updateCategoryTexts() {
     card.querySelector("img").alt = catLabel(cat.id);
     card.querySelector("h3").textContent = catLabel(cat.id);
     card.querySelector(".count").textContent = catDesc(cat.id);
+    const waBtn = card.querySelector(".category-wa");
+    waBtn.href = waLink(catLabel(cat.id));
+    waBtn.setAttribute("aria-label", t("ariaCategoryWa"));
   });
 }
 

@@ -47,7 +47,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=2">
+<link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
 <div class="grain" aria-hidden="true"></div>
@@ -91,7 +91,7 @@
       <h1 data-i18n="heroTitle">Muebles hechos a tu medida, con acabados que duran</h1>
       <p data-i18n="heroText">Cocinas integrales, closets, puertas y muebles sobre diseño. Confección de muebles con atención personal de principio a fin — del levantamiento de medidas a la instalación.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" id="heroWa" href="#" target="_blank" rel="noopener"><svg class="icon"><use href="#icon-whatsapp"/></svg> <span data-i18n="heroWa">Cotizar por WhatsApp</span></a>
+        <button type="button" class="btn btn-primary" id="heroWa" data-schedule-category=""><svg class="icon"><use href="#icon-whatsapp"/></svg> <span data-i18n="heroWa">Cotizar por WhatsApp</span></button>
         <a class="btn btn-secondary" href="#galeria" data-i18n="heroSecondary">Ver trabajos realizados</a>
       </div>
       <div class="stats reveal">
@@ -118,7 +118,7 @@
     <div class="custom-note reveal">
       <div class="custom-note-icon"><svg class="icon"><use href="#icon-tool"/></svg></div>
       <p><strong data-i18n="customNoteStrong">¿No encuentras lo que buscas?</strong> <span data-i18n="customNoteText">Estas son las líneas más pedidas, pero en Taller KinTro hacemos carpintería a la medida de lo que necesites — si tu proyecto no encaja en ninguna categoría, cuéntanoslo y lo cotizamos igual.</span></p>
-      <a class="btn btn-primary" id="customWa" href="#" target="_blank" rel="noopener"><svg class="icon"><use href="#icon-whatsapp"/></svg> <span data-i18n="customWa">Preguntar por WhatsApp</span></a>
+      <button type="button" class="btn btn-primary" id="customWa" data-schedule-category="other"><svg class="icon"><use href="#icon-whatsapp"/></svg> <span data-i18n="customWa">Preguntar por WhatsApp</span></button>
     </div>
   </div>
 </section>
@@ -225,7 +225,7 @@
       <h2 data-i18n="contactTitle">¿Tienes un proyecto en mente?</h2>
       <p data-i18n="contactText">Cuéntanos qué necesitas por WhatsApp — cocina, closet, puertas o un mueble especial — y te enviamos una cotización.</p>
       <div class="contact-actions">
-        <a class="btn btn-primary" id="contactWa" href="#" target="_blank" rel="noopener"><svg class="icon"><use href="#icon-whatsapp"/></svg> <span data-i18n="contactWa">Escribir por WhatsApp</span></a>
+        <button type="button" class="btn btn-primary" id="contactWa" data-schedule-category=""><svg class="icon"><use href="#icon-whatsapp"/></svg> <span data-i18n="contactWa">Escribir por WhatsApp</span></button>
       </div>
       <div class="contact-info">
         <a href="tel:+529987372869"><svg class="icon"><use href="#icon-phone"/></svg> 998 737 2869</a>
@@ -254,7 +254,45 @@
   <button class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Siguiente">›</button>
 </div>
 
-<script src="js/main.js?v=2"></script>
+<div class="schedule-modal" id="scheduleModal" aria-hidden="true">
+  <div class="schedule-backdrop" id="scheduleBackdrop"></div>
+  <div class="schedule-panel" role="dialog" aria-modal="true" aria-labelledby="scheduleTitle">
+    <button class="schedule-close" id="scheduleClose" aria-label="Cerrar">&times;</button>
+    <h3 id="scheduleTitle" data-i18n="scheduleTitle">Agenda tu visita</h3>
+    <p class="schedule-sub" data-i18n="scheduleSub">Cuéntanos qué necesitas, cuándo te queda bien y la dirección para ir a tomar medidas.</p>
+    <div class="schedule-form">
+      <label class="schedule-field">
+        <span data-i18n="scheduleCategoryLabel">¿Qué te interesa cotizar?</span>
+        <select id="scheduleCategory"></select>
+      </label>
+      <label class="schedule-field">
+        <span data-i18n="scheduleDateLabel">Fecha y hora preferida para la visita</span>
+        <div class="schedule-datetime-row">
+          <input type="date" id="scheduleDate" required>
+          <input type="time" id="scheduleTime">
+        </div>
+      </label>
+      <label class="schedule-field">
+        <span data-i18n="scheduleLocationLabel">Dirección para tomar medidas</span>
+        <textarea id="scheduleLocation" rows="2" required data-i18n-placeholder="scheduleLocationPlaceholder" placeholder="Ej. Calle 12 #45, Col. Centro, Cancún"></textarea>
+      </label>
+      <label class="schedule-field">
+        <span data-i18n="scheduleNameLabel">Tu nombre</span>
+        <input type="text" id="scheduleName" data-i18n-placeholder="scheduleNamePlaceholder" placeholder="Ej. María López">
+      </label>
+      <div class="location-share">
+        <button type="button" class="location-btn" id="scheduleLocationBtn">
+          <svg class="icon"><use href="#icon-pin"/></svg>
+          <span data-i18n="locationShareBtn">Compartir mi ubicación de Google Maps</span>
+        </button>
+        <p class="location-status" id="scheduleLocationStatus" hidden></p>
+      </div>
+      <button class="btn btn-primary schedule-send" id="scheduleSend" type="button"><svg class="icon"><use href="#icon-whatsapp"/></svg> <span data-i18n="scheduleSendBtn">Agendar por WhatsApp</span></button>
+    </div>
+  </div>
+</div>
+
+<script src="js/main.js?v=4"></script>
 
 <!-- Analítica gratuita y sin cookies (GoatCounter). No hace nada hasta que crees
      la cuenta gratis en https://www.goatcounter.com/ con el código de sitio

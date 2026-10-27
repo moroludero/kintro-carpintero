@@ -357,6 +357,86 @@ del servidor local.
 que el feed quede en vivo (ver instrucciones dentro del comentario en
 `index.html`).
 
+## 23. Agendar visita (fecha + dirección) en vez de precios — 2026-10-27
+
+Monica probó primero un sistema de carrito con precios en `SoapCatalog`
+(jabones, donde sí tiene sentido mostrar precio fijo). Para Taller KinTro
+pidió explícitamente lo contrario: "para Ramón no tiene sentido los precios"
+(carpintería a medida, cada proyecto se cotiza después de ver el espacio),
+"pero tiene sentido agendar una fecha y agregar una ubicación para saber
+dónde ir a tomar las medidas del mueble".
+
+Se reemplazaron todos los botones de WhatsApp relacionados con cotizar un
+trabajo (antes enlaces directos a `wa.me` con mensaje pre-armado) por un
+modal **"Agenda tu visita"**:
+
+- Selector de categoría (Cocinas Integrales / Closets y Vestidores / Muebles
+  a Medida / Puertas y Gabinetes / Otro — trabajo a la medida).
+- **Fecha preferida para la visita** (`<input type="date">`, con mínimo hoy).
+- **Dirección para tomar medidas** (campo de texto).
+- Nombre (opcional).
+- Un botón "Agendar por WhatsApp" que arma un solo mensaje con categoría,
+  fecha (formateada en el idioma activo, ej. "martes, 3 de noviembre de
+  2026" en ES / "Tuesday, November 3, 2026" en EN), dirección y nombre.
+
+Fecha y dirección son campos **requeridos** (`required` + `reportValidity()`
+antes de enviar) porque son justo el dato que el negocio necesita para poder
+cotizar — a diferencia de `SoapCatalog`, donde el nombre/notas quedaron
+opcionales.
+
+Disparadores del modal (`js/main.js`, atributo `data-schedule-category`):
+- El botón de WhatsApp de cada tarjeta de categoría (`.category-wa`, ahora
+  `<button>` en vez de `<a>`) — abre el modal con esa categoría preseleccionada.
+- "Cotizar por WhatsApp" (hero) y "Escribir por WhatsApp" (sección Contacto)
+  — abren el modal sin categoría forzada (cae en la primera, el usuario puede
+  cambiarla).
+- "Preguntar por WhatsApp" (nota de trabajos a la medida) — abre el modal con
+  "Otro / trabajo a la medida" preseleccionado.
+- El botón de WhatsApp del nav y el flotante (`navWa`/`floatWa`) **se
+  mantuvieron como enlaces directos** a WhatsApp — son para chat general
+  rápido, no están atados a cotizar un proyecto específico.
+
+Se simplificó `waLink()` (ya no acepta un parámetro de categoría, ese flujo
+ahora vive en el modal) y se quitó la traducción `waMessageCategory`, que
+quedó sin uso.
+
+Verificado con Playwright en local (escritorio y móvil 390×844, ES/EN): el
+modal abre con la categoría correcta según qué botón se tocó, la fecha y
+dirección quedan vacías tras cada envío (no arrastran datos de un pedido
+anterior), enviar sin fecha/dirección lo bloquea (validación nativa, no se
+abre WhatsApp), y el mensaje final generado es correcto — ej.:
+"Hola, me interesa cotizar: Muebles a Medida.\nFecha preferida para la
+visita: martes, 3 de noviembre de 2026\nDirección para tomar medidas: Calle
+12 #45, Col. Centro, Cancún\nNombre: Ana Torres". Sin errores de consola.
+
+## 24. Hora de visita y ubicación de Google Maps (2026-10-27)
+
+Dos mejoras al modal "Agenda tu visita" del punto 23, a pedido de Monica:
+
+- **Hora de la visita**: se agregó un `<input type="time">` junto al campo de
+  fecha (`scheduleDate`/`scheduleTime` en `js/main.js`). El campo "Fecha
+  preferida para la visita" pasó a llamarse "Fecha y hora preferida para la
+  visita"; es opcional (la fecha sigue siendo el único campo requerido). La
+  función `formatScheduleDate` se renombró a `formatScheduleDateTime` y ahora
+  combina fecha+hora en un solo texto localizado cuando hay hora, ej.
+  "jueves, 5 de noviembre de 2026, 10:30 a.m." en ES / "Thursday, November 5,
+  2026, 10:30 AM" en EN.
+- **Compartir ubicación de Google Maps**: mismo mecanismo que se agregó a
+  `SoapCatalog` el mismo día (ver su PROCESO.md punto 25) — botón opcional
+  que usa `navigator.geolocation` para armar un link
+  `https://www.google.com/maps?q=lat,lng`, agregado como línea extra al
+  mensaje de WhatsApp junto con (no en lugar de) la dirección escrita a mano.
+  Requiere HTTPS/`localhost`; funcionará en producción vía GitHub Pages.
+
+Verificado con Playwright en local (simulando el permiso de geolocalización
+con coordenadas de prueba en Cancún): el modal muestra fecha y hora
+correctamente en el input, el botón de ubicación pasa por "Obteniendo tu
+ubicación…" → "Ubicación agregada ✓", y el mensaje final generado es
+correcto — ej.: "Hola, me interesa cotizar: Cocinas Integrales.\nFecha y hora
+preferida para la visita: jueves, 5 de noviembre de 2026, 10:30 a.m.\nDirección
+para tomar medidas: Av. Tulum 123, SM 4, Cancún\nUbicación (Google Maps):
+https://www.google.com/maps?q=21.1748,-86.8467". Sin errores de consola.
+
 ## Estado final
 
 - **Sitio en vivo:** https://moroludero.github.io/kintro-carpintero/
@@ -367,7 +447,7 @@ que el feed quede en vivo (ver instrucciones dentro del comentario en
 - **Idiomas:** ES/EN, selector en el nav (persistido en `localStorage` como `lang-kintro`)
 - **Diseño:** rediseño premium (Fraunces/Inter, scroll-reveal, iconos SVG) — ver punto 16
 - **SEO/analítica:** Open Graph, JSON-LD, `robots.txt`/`sitemap.xml` listos — ver punto 21
-- **Cambios de esta sesión (2026-10-26) sin subir a GitHub todavía** (local únicamente, pendiente `git push` cuando Monica lo pida)
+- **Cambios de esta sesión (2026-10-26 y 2026-10-27) sin subir a GitHub todavía** (local únicamente, pendiente `git push` cuando Monica lo pida)
 
 ## Pendientes
 

@@ -54,9 +54,28 @@ const I18N = {
     pageTitle: "Taller KinTro — Muebles y carpintería a medida en Cancún",
     metaDesc: "Taller KinTro: cocinas integrales, closets, puertas y muebles a medida. Carpintería residencial en Cancún. Cotiza por WhatsApp.",
     waMessage: "Hola, vi su catálogo y me interesa cotizar un proyecto de carpintería.",
-    waMessageCategory: "Hola, vi su catálogo y me interesa cotizar: {category}.",
-    ariaCategoryWa: "Cotizar por WhatsApp",
+    ariaCategoryWa: "Agendar visita para cotizar",
     projectWord: "proyecto",
+    scheduleTitle: "Agenda tu visita",
+    scheduleSub: "Cuéntanos qué necesitas, cuándo te queda bien y la dirección para ir a tomar medidas.",
+    scheduleCategoryLabel: "¿Qué te interesa cotizar?",
+    scheduleCategoryOther: "Otro / trabajo a la medida",
+    scheduleDateLabel: "Fecha y hora preferida para la visita",
+    scheduleLocationLabel: "Dirección para tomar medidas",
+    scheduleLocationPlaceholder: "Ej. Calle 12 #45, Col. Centro, Cancún",
+    scheduleNameLabel: "Tu nombre",
+    scheduleNamePlaceholder: "Ej. María López",
+    scheduleSendBtn: "Agendar por WhatsApp",
+    scheduleGreeting: "Hola, me interesa cotizar:",
+    scheduleDateLine: "Fecha y hora preferida para la visita",
+    scheduleLocationLine: "Dirección para tomar medidas",
+    scheduleNameLine: "Nombre",
+    locationShareBtn: "Compartir mi ubicación de Google Maps",
+    locationLoading: "Obteniendo tu ubicación…",
+    locationAdded: "Ubicación agregada ✓",
+    locationError: "No se pudo obtener tu ubicación. Puedes escribir la dirección arriba.",
+    locationDenied: "Permiso de ubicación denegado. Puedes escribir la dirección arriba.",
+    locationLine: "Ubicación (Google Maps)",
   },
   en: {
     navTrabajos: "Our Work",
@@ -108,9 +127,28 @@ const I18N = {
     pageTitle: "Taller KinTro — Custom furniture and carpentry in Cancún",
     metaDesc: "Taller KinTro: custom kitchens, closets, doors, and furniture. Residential carpentry in Cancún. Get a quote on WhatsApp.",
     waMessage: "Hi, I saw your catalog and I'm interested in a quote for a carpentry project.",
-    waMessageCategory: "Hi, I saw your catalog and I'm interested in a quote for: {category}.",
-    ariaCategoryWa: "Get a quote on WhatsApp",
+    ariaCategoryWa: "Schedule a visit to quote",
     projectWord: "project",
+    scheduleTitle: "Schedule your visit",
+    scheduleSub: "Tell us what you need, when works for you, and the address to come take measurements.",
+    scheduleCategoryLabel: "What would you like a quote for?",
+    scheduleCategoryOther: "Other / custom work",
+    scheduleDateLabel: "Preferred date and time for the visit",
+    scheduleLocationLabel: "Address to take measurements",
+    scheduleLocationPlaceholder: "E.g. Street 12 #45, Col. Centro, Cancún",
+    scheduleNameLabel: "Your name",
+    scheduleNamePlaceholder: "E.g. Maria Lopez",
+    scheduleSendBtn: "Schedule on WhatsApp",
+    scheduleGreeting: "Hi, I'm interested in a quote for:",
+    scheduleDateLine: "Preferred visit date and time",
+    scheduleLocationLine: "Address to take measurements",
+    scheduleNameLine: "Name",
+    locationShareBtn: "Share my Google Maps location",
+    locationLoading: "Getting your location…",
+    locationAdded: "Location added ✓",
+    locationError: "Couldn't get your location. You can type the address above.",
+    locationDenied: "Location permission denied. You can type the address above.",
+    locationLine: "Location (Google Maps)",
   },
 };
 
@@ -150,14 +188,13 @@ function catDesc(id) { return CATEGORY_I18N[id][currentLang].desc; }
 // ---- WhatsApp ----
 const WHATSAPP_NUMBER = "5219987372869"; // formato internacional sin '+' ni espacios
 
-function waLink(category) {
-  const msg = category ? t("waMessageCategory").replace("{category}", category) : t("waMessage");
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+function waLink() {
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t("waMessage"))}`;
 }
 
 function updateWaLinks() {
   const link = waLink();
-  ["navWa", "heroWa", "contactWa", "floatWa", "customWa"].forEach((id) => {
+  ["navWa", "floatWa"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.href = link;
   });
@@ -190,9 +227,9 @@ function renderCategoryCards() {
             <p class="count">${catDesc(cat.id)}</p>
           </div>
         </a>
-        <a class="category-wa" href="${waLink(catLabel(cat.id))}" target="_blank" rel="noopener" aria-label="${t("ariaCategoryWa")}">
+        <button type="button" class="category-wa" data-schedule-category="${cat.id}" aria-label="${t("ariaCategoryWa")}">
           <svg class="icon"><use href="#icon-whatsapp"/></svg>
-        </a>
+        </button>
       </div>`;
   }).join("");
 }
@@ -204,12 +241,148 @@ function updateCategoryTexts() {
     card.querySelector("h3").textContent = catLabel(cat.id);
     card.querySelector(".count").textContent = catDesc(cat.id);
     const waBtn = card.querySelector(".category-wa");
-    waBtn.href = waLink(catLabel(cat.id));
     waBtn.setAttribute("aria-label", t("ariaCategoryWa"));
   });
 }
 
 renderCategoryCards();
+
+// ---- Schedule visit modal (date + address, replaces direct WhatsApp links
+// for anything category/quote-related, since pricing doesn't apply here —
+// Ramón needs a date and an address to go take measurements instead) ----
+function scheduleCategoryOptionsHTML() {
+  const options = CATEGORIES.map((c) => `<option value="${c.id}">${catLabel(c.id)}</option>`).join("");
+  return options + `<option value="other">${t("scheduleCategoryOther")}</option>`;
+}
+
+function renderScheduleCategoryOptions() {
+  document.getElementById("scheduleCategory").innerHTML = scheduleCategoryOptionsHTML();
+}
+
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function openScheduleModal(categoryId) {
+  const select = document.getElementById("scheduleCategory");
+  select.value = categoryId || CATEGORIES[0].id;
+  const modal = document.getElementById("scheduleModal");
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  document.getElementById("scheduleDate").focus();
+}
+
+function closeScheduleModal() {
+  const modal = document.getElementById("scheduleModal");
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+function formatScheduleDateTime(isoDate, time) {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  const opts = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+  let dateObj;
+  if (time) {
+    const [hh, mm] = time.split(":").map(Number);
+    dateObj = new Date(y, m - 1, d, hh, mm);
+    opts.hour = "numeric";
+    opts.minute = "2-digit";
+  } else {
+    dateObj = new Date(y, m - 1, d);
+  }
+  const locale = currentLang === "es" ? "es-MX" : "en-US";
+  return new Intl.DateTimeFormat(locale, opts).format(dateObj);
+}
+
+function waScheduleMessage() {
+  const categoryId = document.getElementById("scheduleCategory").value;
+  const categoryLabel = categoryId === "other" ? t("scheduleCategoryOther") : catLabel(categoryId);
+  const date = document.getElementById("scheduleDate").value;
+  const time = document.getElementById("scheduleTime").value;
+  const location = document.getElementById("scheduleLocation").value.trim();
+  const name = document.getElementById("scheduleName").value.trim();
+  let msg = `${t("scheduleGreeting")} ${categoryLabel}.`;
+  if (date) msg += `\n${t("scheduleDateLine")}: ${formatScheduleDateTime(date, time)}`;
+  if (location) msg += `\n${t("scheduleLocationLine")}: ${location}`;
+  if (name) msg += `\n${t("scheduleNameLine")}: ${name}`;
+  if (scheduleLocation) msg += `\n${t("locationLine")}: ${scheduleLocation.link}`;
+  return msg;
+}
+
+// ---- Google Maps location share ----
+let scheduleLocation = null; // { lat, lng, link }
+
+function requestScheduleLocation() {
+  const btn = document.getElementById("scheduleLocationBtn");
+  const status = document.getElementById("scheduleLocationStatus");
+  status.hidden = false;
+  if (!navigator.geolocation) {
+    status.className = "location-status error";
+    status.textContent = t("locationError");
+    return;
+  }
+  btn.disabled = true;
+  status.className = "location-status";
+  status.textContent = t("locationLoading");
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const { latitude, longitude } = pos.coords;
+      scheduleLocation = { lat: latitude, lng: longitude, link: `https://www.google.com/maps?q=${latitude},${longitude}` };
+      status.className = "location-status success";
+      status.textContent = t("locationAdded");
+      btn.disabled = false;
+    },
+    (err) => {
+      scheduleLocation = null;
+      status.className = "location-status error";
+      status.textContent = err.code === err.PERMISSION_DENIED ? t("locationDenied") : t("locationError");
+      btn.disabled = false;
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+function resetScheduleLocation() {
+  scheduleLocation = null;
+  const status = document.getElementById("scheduleLocationStatus");
+  status.hidden = true;
+  status.textContent = "";
+  status.className = "location-status";
+}
+
+function initScheduleModal() {
+  renderScheduleCategoryOptions();
+  document.getElementById("scheduleDate").min = todayISO();
+  document.getElementById("scheduleClose").addEventListener("click", closeScheduleModal);
+  document.getElementById("scheduleBackdrop").addEventListener("click", closeScheduleModal);
+  document.getElementById("scheduleLocationBtn").addEventListener("click", requestScheduleLocation);
+  document.addEventListener("keydown", (e) => {
+    if (!document.getElementById("scheduleModal").classList.contains("open")) return;
+    if (e.key === "Escape") closeScheduleModal();
+  });
+  document.addEventListener("click", (e) => {
+    const trigger = e.target.closest("[data-schedule-category]");
+    if (!trigger) return;
+    e.preventDefault();
+    openScheduleModal(trigger.dataset.scheduleCategory);
+  });
+  document.getElementById("scheduleSend").addEventListener("click", () => {
+    const dateInput = document.getElementById("scheduleDate");
+    const locationInput = document.getElementById("scheduleLocation");
+    if (!dateInput.reportValidity() || !locationInput.reportValidity()) return;
+    const msg = waScheduleMessage();
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
+    dateInput.value = "";
+    document.getElementById("scheduleTime").value = "";
+    locationInput.value = "";
+    document.getElementById("scheduleName").value = "";
+    resetScheduleLocation();
+    closeScheduleModal();
+  });
+}
 
 // ---- Render filter bar ----
 const filterBar = document.getElementById("filterBar");
@@ -341,6 +514,9 @@ function applyStaticText() {
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     el.textContent = t(el.dataset.i18n);
   });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+    el.setAttribute("placeholder", t(el.dataset.i18nPlaceholder));
+  });
 }
 
 function setLanguage(lang) {
@@ -357,11 +533,22 @@ function setLanguage(lang) {
   renderGallery(currentFilter);
   updateWaLinks();
 
+  const prevScheduleCategory = document.getElementById("scheduleCategory").value;
+  renderScheduleCategoryOptions();
+  document.getElementById("scheduleCategory").value = prevScheduleCategory || CATEGORIES[0].id;
+
   menuToggle.setAttribute("aria-label", t("ariaMenu"));
   document.getElementById("floatWa").setAttribute("aria-label", t("ariaFloatWa"));
   document.getElementById("lightboxClose").setAttribute("aria-label", t("ariaClose"));
   document.getElementById("lightboxPrev").setAttribute("aria-label", t("ariaPrev"));
   document.getElementById("lightboxNext").setAttribute("aria-label", t("ariaNext"));
+  document.getElementById("scheduleClose").setAttribute("aria-label", t("ariaClose"));
+
+  if (scheduleLocation) {
+    const status = document.getElementById("scheduleLocationStatus");
+    status.className = "location-status success";
+    status.textContent = t("locationAdded");
+  }
 
   const fbLink = document.querySelector('.social-row a[href*="facebook.com"]');
   const igLink = document.querySelector('.social-row a[href*="instagram.com"]');
@@ -379,5 +566,6 @@ function initLangSwitch() {
   });
 }
 
+initScheduleModal();
 initLangSwitch();
 setLanguage(currentLang);

@@ -472,6 +472,133 @@ para abrir el selector (`showPicker()`) se deja intacto. Verificado con
 Playwright: escribir una fecha/hora completa por teclado en ambos campos ya
 no cambia su valor (quedan vacíos), sin errores de consola.
 
+## 26. Panel para que Ramón configure su disponibilidad (2026-10-29)
+
+Monica pidió que Ramón pudiera configurar qué días/horarios atiende, para que
+el modal "Agenda tu visita" (punto 23) solo deje elegir fecha/hora dentro de
+eso — antes el date/time picker nativo no tenía ninguna restricción real. Se
+construyó un backend compartido en Azure (reutilizando su cuenta — la
+suscripción vieja estaba deshabilitada por inactividad sin causa de pago, así
+que se creó una suscripción nueva con la misma tarjeta) y un panel nuevo en
+este repo. Infraestructura y endpoints compartidos con Jabones Licha — ver el
+detalle completo (Cosmos DB, Storage, Function App con Identidad Administrada,
+Application Insights, alerta de presupuesto) en `SoapCatalog/PROCESO.md`
+punto 26, mismo grupo de recursos (`rg-moroludero-catalogos`).
+
+Específico de este sitio:
+- **Contenedor Cosmos DB** `kintro-availability` (partition key `/id`, un solo
+  documento `config` con los 7 días + fechas bloqueadas).
+- **Endpoints**: `GET/POST /api/kintro/availability` (el GET es público; el
+  POST requiere el header `x-admin-password`).
+- **`admin.html`** (nuevo, en este repo) — contraseña propia (no se
+  documenta aquí a propósito, Monica la tiene por chat), instalable en el
+  teléfono como ícono de pantalla de inicio (`admin-manifest.json` + íconos
+  `images/admin-icon-*.png`, estilo "TK" madera). Por cada día: interruptor
+  encendido/apagado + hora de inicio/fin. Más abajo, lista de fechas
+  bloqueadas (para vacaciones) con botón para agregar/quitar una fecha suelta.
+- **`js/main.js`**: `loadAvailability()` trae la configuración de la API al
+  cargar, con caché en `localStorage` y un valor por defecto sensato si la
+  API no responde (el sitio nunca se rompe por esto). El modal "Agenda tu
+  visita" ahora valida la fecha/hora elegida contra esa disponibilidad: si el
+  día está apagado o bloqueado, o la hora cae fuera del rango de ese día,
+  muestra un aviso y bloquea el envío — tanto al cambiar la fecha/hora como
+  al tocar "Agendar por WhatsApp". El campo de hora también ajusta su
+  `min`/`max` al rango del día elegido.
+
+**Limitación real, no un bug:** el `<input type="date">` nativo no permite
+tachar/deshabilitar visualmente días puntuales en el propio calendario (solo
+soporta un rango `min`/`max` continuo) — por eso la restricción es por
+validación después de elegir, no por "grisar" los días no disponibles dentro
+del selector. Si más adelante se quiere ese nivel de pulido, haría falta
+reemplazar el picker nativo por un calendario a la medida (alcance mayor al
+pedido de hoy).
+
+Verificado end-to-end con Playwright (contra la API real en Azure): Ramón
+apaga un día y agrega una fecha bloqueada en el panel → el modal público
+rechaza esa fecha bloqueada, rechaza el día apagado, acepta un día habilitado
+sin aviso, y rechaza una hora fuera del rango configurado — sin errores de
+consola en ningún punto.
+
+**Actualización (mismo día): descansos diarios y bloqueos parciales por
+fecha.** Monica señaló que Ramón también podría querer bloquear solo una
+parte de un día (ej. hora de comida todos los días, o un compromiso puntual
+de 2pm a 4pm un día específico), no solo el día completo. Se amplió el
+modelo de datos:
+- Cada día ahora admite un **descanso opcional** (`breakStart`/`breakEnd`,
+  ej. comida 1pm–2pm) que se repite automáticamente cada vez que ese día esté
+  habilitado — en el panel es una casilla "Descanso (ej. comida)" que al
+  marcarse revela los dos campos de hora.
+- Las **fechas bloqueadas** dejaron de ser solo una fecha completa — cada
+  entrada puede bloquear todo el día o, con la casilla "Solo bloquear una
+  parte del día", solo una ventana de horas dentro de esa fecha (ej. "10 de
+  noviembre, 10:00 a 12:00").
+- El modal público ahora distingue entre un **bloqueo duro** (rechaza el
+  envío: hora dentro del descanso, dentro de una ventana bloqueada, día
+  apagado, o fecha bloqueada completa) y una **nota informativa** (cuando
+  todavía no se ha elegido hora pero esa fecha tiene una ventana bloqueada o
+  un descanso — avisa sin impedir seguir escribiendo).
+
+Verificado de nuevo con Playwright: Ramón activa el descanso de 1pm-2pm los
+lunes y bloquea el 10 de noviembre de 10:00 a 12:00 desde el panel → en el
+sitio público, elegir lunes a las 13:30 lo rechaza (descanso), 10:00am sí
+funciona; elegir el 10 de noviembre sin hora muestra el aviso informativo,
+a las 11:00 lo rechaza (dentro del bloqueo), a las 15:00 sí funciona. Sin
+errores de consola.
+
+**Actualización (mismo día): validaciones de fecha/hora en el panel.** A
+pedido de Monica: (1) no se puede bloquear una fecha que ya pasó (`min` en el
+selector + verificación aunque se fuerce por JS, más un filtro del mismo lado
+en la API por si acaso), y (2) en cualquier rango de horas (horario del día,
+descanso, o ventana de una fecha bloqueada) la hora de fin no puede ser igual
+o anterior a la de inicio — se avisa y revierte el campo. Verificado con
+Playwright: fecha pasada forzada por JS queda filtrada, ventana con fin antes
+de inicio no se agrega, y la hora de fin de un día revertida a su valor
+anterior al intentar ponerla antes que el inicio.
+
+**Actualización (mismo día): descanso general aplicable a todos los días.**
+Monica preguntó si sería más cómodo configurar el descanso (comida) de forma
+recurrente en vez de día por día. Se investigó cómo lo resuelven Calendly,
+Acuity y Google Calendar antes de implementar — el patrón de Acuity ("mismo
+horario para todos los días" + poder anular un día específico después) fue el
+más adecuado para un usuario no técnico con pocos días. Se agregó una caja
+"Descanso general" arriba de la lista de días: Ramón pone una sola vez la
+hora de inicio/fin y toca "Aplicar a todos los días" — se copia a todos los
+días que tenga activados (sin tocar los días apagados), y después puede
+seguir ajustando un día puntual distinto desde su propio control, sin que se
+pierda. El campo se precarga solo si ya hay un descanso guardado, para no
+verse vacío al volver a entrar. No requirió cambios de API (sigue siendo el
+mismo campo `breakStart`/`breakEnd` por día; esto es solo una forma más rápida
+de llenarlo). Se encontró y corrigió un bug visual durante la verificación:
+los campos de hora del descanso general eran muy angostos y recortaban el
+texto (mostraban ":00 PM" en vez de "01:00 PM"). Verificado con Playwright:
+aplicar el descanso general llena los 6 días activos sin tocar el domingo
+(apagado), anular el descanso del viernes a un horario distinto se respeta
+después de guardar y recargar, y el campo se precarga correctamente al volver
+a abrir el panel.
+
+## 27. Galería: Ramón sube fotos de trabajos nuevos (2026-10-30)
+
+Mismo patrón que el panel de productos de Jabones Licha: nuevo contenedor
+Cosmos DB `kintro-gallery` (partition key `/category`) y Blob Storage
+`kintro-fotos` (lectura pública), endpoints `GET/POST /api/kintro/gallery` y
+`DELETE /api/kintro/gallery/{id}`. En `admin.html` se agregó una tarjeta
+"Agregar foto de un trabajo nuevo" (categoría + descripción opcional + foto)
+y la lista de lo agregado con botón "Quitar". En `js/main.js`,
+`loadApiGalleryImages()` mezcla las fotos de la API dentro de `ALL_IMAGES`
+(con caché en `localStorage` y respaldo a solo las fotos fijas si la API no
+responde) y se re-renderiza la galería — las fotos nuevas aparecen filtradas
+por categoría igual que las fijas. Verificado con Playwright de punta a
+punta: subir foto con descripción → aparece en el panel y en la galería
+pública filtrada por categoría → eliminar funciona y desaparece de ambos
+lados. Sin cambios de permisos nuevos (el rol de Storage ya cubría toda la
+cuenta, no por contenedor).
+
+**Nota:** esto se construyó con el mismo patrón de contraseña compartida que
+ya existía — Monica pidió inmediatamente después unificar esto con el panel
+de Jabones Licha en un solo sitio de administración con cuentas reales y
+feature flags por negocio (ver `project_catalog_saas_idea.md` en la memoria).
+Ese es el siguiente paso, documentado aparte una vez construido.
+
 ## Estado final
 
 - **Sitio en vivo:** https://moroludero.github.io/kintro-carpintero/
@@ -482,12 +609,47 @@ no cambia su valor (quedan vacíos), sin errores de consola.
 - **Idiomas:** ES/EN, selector en el nav (persistido en `localStorage` como `lang-kintro`)
 - **Diseño:** rediseño premium (Fraunces/Inter, scroll-reveal, iconos SVG) — ver punto 16
 - **SEO/analítica:** Open Graph, JSON-LD, `robots.txt`/`sitemap.xml` listos — ver punto 21
-- **Cambios de esta sesión (2026-10-26 y 2026-10-27) sin subir a GitHub todavía** (local únicamente, pendiente `git push` cuando Monica lo pida)
+- **Cambios de esta sesión (2026-10-26, 2026-10-27 y 2026-10-29) sin subir a GitHub todavía** (local únicamente, pendiente `git push` cuando Monica lo pida). La API de Azure (punto 26) ya está desplegada y en vivo — es infraestructura aparte, no parte de este repo — aunque el sitio público/`admin.html` de este repo aún no.
+
+## 28. Panel de administración unificado, con cuentas reales (2026-10-30)
+
+Mismo cambio que en Jabones Licha (ver `SoapCatalog/PROCESO.md` punto 27) —
+**el `admin.html` que vivía en este repo se eliminó**, junto con el de
+Jabones Licha, y ambos se reemplazaron por un solo panel compartido con
+cuentas reales (contenedor Cosmos `accounts`, contraseña con hash) y feature
+flags por negocio (contenedor `businesses`): Taller KinTro tiene
+`availability: true` y `gallery: true`, `products: false` (eso es solo de
+Licha). Ramón usa el usuario `ramon` con su contraseña de siempre. El sitio
+vive en el hosting estático de Azure Storage, fuera de este repo —
+código fuente en `C:\Users\morol\OneDrive\Documents\MoroluderoAdminPanel`.
+Verificado con Playwright: login de Ramón muestra disponibilidad y galería
+(no productos), y un token de otro negocio es rechazado por estos endpoints.
+
+## 29. Migración de las 55 fotos originales de la galería al backend (2026-10-30)
+
+Mismo pedido que en Jabones Licha (ver `SoapCatalog/PROCESO.md` punto 28):
+Monica quiere que Ramón pueda eliminar (o en el futuro editar) cualquier foto
+de su galería, no solo las que agregue de ahora en adelante. Se migraron las
+55 fotos originales (`MoroluderoCatalogosAPI/scripts/migrate-kintro-gallery.js`)
+a Blob Storage + Cosmos DB, con id estable por foto (ej. `cocinas-01`). En
+`js/main.js` se eliminó la generación de `ALL_IMAGES` a partir de archivos
+locales — la galería completa ahora viene siempre de la API
+(`setGalleryFromApi()`, antes `mergeApiGalleryImages()`), con el mismo
+respaldo en `localStorage` si la API no responde. La portada de cada tarjeta
+de categoría (`images/<categoria>-01.jpg`) sigue siendo un archivo local fijo
+y no depende de esto — no se rompe aunque Ramón borre esa foto de su galería
+editable.
+
+Verificado con Playwright: el sitio público muestra las 55 fotos sin errores
+de consola, Ramón elimina una foto migrada desde el panel y el conteo baja a
+54 correctamente, y se restauró después volviendo a correr el script de
+migración (es seguro de repetir — usa upsert por id fijo).
 
 ## Pendientes
 
 - [ ] Crear la cuenta gratis en goatcounter.com (código de sitio "taller-kintro") para activar la analítica
 - [ ] Crear la cuenta gratis en snapwidget.com, conectar @tallerkintro, y pegar el iframe real en `index.html` (punto 22) para activar el feed de Instagram
+- [ ] Darle a Ramón el link del panel unificado (ver punto 28) y su usuario/contraseña (se los pasé a Monica por chat, no quedan escritos en este repo), y mostrarle cómo instalarlo en su pantalla de inicio
 - [ ] `git push` de todos los cambios de esta sesión cuando Monica confirme
 
 ## Cómo seguir editando

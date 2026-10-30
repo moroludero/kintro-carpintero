@@ -75,6 +75,11 @@ const I18N = {
     locationAdded: "Ubicación agregada ✓",
     locationError: "No se pudo obtener tu ubicación. Puedes escribir la dirección arriba.",
     locationDenied: "Permiso de ubicación denegado. Puedes escribir la dirección arriba.",
+    availabilityDayClosed: "Ramón no atiende visitas ese día. Elige otra fecha.",
+    availabilityOutsideHours: (start, end) => `Ese horario está fuera de la disponibilidad de Ramón para ese día (${start} a ${end}).`,
+    availabilityOnBreak: (start, end) => `Ramón no atiende en ese horario ese día (descanso de ${start} a ${end}). Elige otra hora.`,
+    availabilityBlockedWindow: (start, end) => `Ramón ya tiene algo agendado ese día de ${start} a ${end}. Elige otra hora.`,
+    availabilityPartiallyBlocked: (start, end) => `Ojo: Ramón ya tiene algo agendado ese día de ${start} a ${end} — elige una hora fuera de ese rango.`,
     locationLine: "Ubicación (Google Maps)",
   },
   en: {
@@ -148,6 +153,11 @@ const I18N = {
     locationAdded: "Location added ✓",
     locationError: "Couldn't get your location. You can type the address above.",
     locationDenied: "Location permission denied. You can type the address above.",
+    availabilityDayClosed: "Ramón doesn't take visits that day. Pick another date.",
+    availabilityOutsideHours: (start, end) => `That time is outside Ramón's availability for that day (${start} to ${end}).`,
+    availabilityOnBreak: (start, end) => `Ramón isn't available at that time that day (break from ${start} to ${end}). Pick another time.`,
+    availabilityBlockedWindow: (start, end) => `Ramón already has something booked that day from ${start} to ${end}. Pick another time.`,
+    availabilityPartiallyBlocked: (start, end) => `Heads up: Ramón already has something booked that day from ${start} to ${end} — pick a time outside that range.`,
     locationLine: "Location (Google Maps)",
   },
 };
@@ -188,6 +198,87 @@ function catDesc(id) { return CATEGORY_I18N[id][currentLang].desc; }
 // ---- WhatsApp ----
 const WHATSAPP_NUMBER = "5219987372869"; // formato internacional sin '+' ni espacios
 
+// Ramón configura sus días/horarios disponibles desde admin.html (su teléfono).
+// Mientras carga o si la API no responde, se usa esta disponibilidad por
+// defecto (igual a la que trae la API si nunca la ha configurado).
+const API_BASE = "https://moroludero-catalogos-api.azurewebsites.net";
+const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+let AVAILABILITY = {
+  days: {
+    mon: { enabled: true, start: "09:00", end: "18:00", breakStart: null, breakEnd: null },
+    tue: { enabled: true, start: "09:00", end: "18:00", breakStart: null, breakEnd: null },
+    wed: { enabled: true, start: "09:00", end: "18:00", breakStart: null, breakEnd: null },
+    thu: { enabled: true, start: "09:00", end: "18:00", breakStart: null, breakEnd: null },
+    fri: { enabled: true, start: "09:00", end: "18:00", breakStart: null, breakEnd: null },
+    sat: { enabled: true, start: "09:00", end: "14:00", breakStart: null, breakEnd: null },
+    sun: { enabled: false, start: "09:00", end: "14:00", breakStart: null, breakEnd: null },
+  },
+  // Cada entrada bloquea todo el día ({date}) o solo una ventana de ese día ({date, start, end}).
+  blockedDates: [],
+};
+
+async function loadAvailability() {
+  try {
+    const res = await fetch(`${API_BASE}/api/kintro/availability`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (data && data.days) {
+      AVAILABILITY = data;
+      localStorage.setItem("availabilityCache", JSON.stringify(data));
+    }
+  } catch (err) {
+    console.warn("No se pudo cargar la disponibilidad de la API, usando caché/valor por defecto", err);
+    try {
+      const cached = JSON.parse(localStorage.getItem("availabilityCache") || "null");
+      if (cached && cached.days) AVAILABILITY = cached;
+    } catch (e) {
+      // sin caché — se queda con la disponibilidad por defecto de arriba
+    }
+  }
+}
+
+function dayKeyFor(isoDate) {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  return DAY_KEYS[new Date(y, m - 1, d).getDay()];
+}
+
+// Devuelve null si la fecha/hora es válida, o un mensaje de error si no.
+function availabilityIssue(isoDate, time) {
+  if (!isoDate) return null;
+
+  const blockedEntries = (AVAILABILITY.blockedDates || []).filter((b) => b.date === isoDate);
+  for (const b of blockedEntries) {
+    const isWholeDay = b.start == null || b.end == null;
+    if (isWholeDay) return t("availabilityDayClosed");
+    if (time && time >= b.start && time <= b.end) return t("availabilityBlockedWindow")(b.start, b.end);
+  }
+
+  const dayConfig = AVAILABILITY.days[dayKeyFor(isoDate)];
+  if (!dayConfig || !dayConfig.enabled) {
+    return t("availabilityDayClosed");
+  }
+  if (time && (time < dayConfig.start || time > dayConfig.end)) {
+    return t("availabilityOutsideHours")(dayConfig.start, dayConfig.end);
+  }
+  if (time && dayConfig.breakStart && dayConfig.breakEnd && time >= dayConfig.breakStart && time <= dayConfig.breakEnd) {
+    return t("availabilityOnBreak")(dayConfig.breakStart, dayConfig.breakEnd);
+  }
+  return null;
+}
+
+// Nota informativa (no bloquea el envío) para cuando aún no se eligió hora
+// pero esa fecha tiene una ventana bloqueada o un descanso diario.
+function availabilityNote(isoDate, time) {
+  if (!isoDate || time) return null;
+  const partial = (AVAILABILITY.blockedDates || []).find((b) => b.date === isoDate && b.start != null && b.end != null);
+  if (partial) return t("availabilityPartiallyBlocked")(partial.start, partial.end);
+  const dayConfig = AVAILABILITY.days[dayKeyFor(isoDate)];
+  if (dayConfig && dayConfig.enabled && dayConfig.breakStart && dayConfig.breakEnd) {
+    return t("availabilityOnBreak")(dayConfig.breakStart, dayConfig.breakEnd);
+  }
+  return null;
+}
+
 function waLink() {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t("waMessage"))}`;
 }
@@ -200,17 +291,44 @@ function updateWaLinks() {
   });
 }
 
-// ---- Build image list from categories ----
-const ALL_IMAGES = [];
-CATEGORIES.forEach((cat) => {
-  for (let i = 1; i <= cat.count; i++) {
-    const num = String(i).padStart(2, "0");
-    ALL_IMAGES.push({ src: `images/${cat.id}-${num}.jpg`, category: cat.id, num });
-  }
-});
+// ---- La galería vive entera en el backend (todas las fotos originales se
+// migraron ahí) para que Ramón pueda agregar o eliminar cualquier foto desde
+// su panel, no solo las que agregue de ahora en adelante. Empieza vacía y se
+// llena al conectar con la API, con respaldo en localStorage si no responde.
+let ALL_IMAGES = [];
 
 function imgAlt(img) {
-  return `${catLabel(img.category)} — Taller KinTro, ${t("projectWord")} ${img.num}`;
+  if (img.caption) return img.caption;
+  return `${catLabel(img.category)} — Taller KinTro`;
+}
+
+function setGalleryFromApi(items) {
+  ALL_IMAGES = items
+    .filter((item) => item && item.id && CATEGORIES.some((c) => c.id === item.category))
+    .map((item) => ({ src: item.photoUrl, category: item.category, caption: item.caption, apiId: item.id }));
+}
+
+async function loadApiGalleryImages() {
+  try {
+    const res = await fetch(`${API_BASE}/api/kintro/gallery`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) throw new Error("API devolvió una lista vacía");
+    localStorage.setItem("galleryCache", JSON.stringify(data));
+    setGalleryFromApi(data);
+    renderGallery(currentFilter);
+  } catch (err) {
+    console.warn("No se pudieron cargar las fotos de la galería desde la API, usando caché local", err);
+    try {
+      const cached = JSON.parse(localStorage.getItem("galleryCache") || "[]");
+      if (Array.isArray(cached) && cached.length) {
+        setGalleryFromApi(cached);
+        renderGallery(currentFilter);
+      }
+    } catch (e) {
+      // sin caché disponible — la galería queda vacía hasta que la API responda
+    }
+  }
 }
 
 // ---- Render category cards ----
@@ -379,6 +497,26 @@ function initScheduleModal() {
     });
     field.addEventListener("paste", (e) => e.preventDefault());
   });
+  const refreshAvailabilityHint = () => {
+    const msgEl = document.getElementById("scheduleAvailabilityMsg");
+    if (!dateField.value) {
+      msgEl.hidden = true;
+      return;
+    }
+    const dayConfig = AVAILABILITY.days[dayKeyFor(dateField.value)];
+    if (dayConfig && dayConfig.enabled) {
+      timeField.min = dayConfig.start;
+      timeField.max = dayConfig.end;
+    }
+    const issue = availabilityIssue(dateField.value, timeField.value);
+    const note = issue ? null : availabilityNote(dateField.value, timeField.value);
+    const text = issue || note;
+    msgEl.hidden = !text;
+    msgEl.className = issue ? "location-status error" : "location-status";
+    msgEl.textContent = text || "";
+  };
+  dateField.addEventListener("change", refreshAvailabilityHint);
+  timeField.addEventListener("change", refreshAvailabilityHint);
   document.getElementById("scheduleClose").addEventListener("click", closeScheduleModal);
   document.getElementById("scheduleBackdrop").addEventListener("click", closeScheduleModal);
   document.getElementById("scheduleLocationBtn").addEventListener("click", requestScheduleLocation);
@@ -394,8 +532,17 @@ function initScheduleModal() {
   });
   document.getElementById("scheduleSend").addEventListener("click", () => {
     const dateInput = document.getElementById("scheduleDate");
+    const timeInput = document.getElementById("scheduleTime");
     const locationInput = document.getElementById("scheduleLocation");
     if (!dateInput.reportValidity() || !locationInput.reportValidity()) return;
+    const issue = availabilityIssue(dateInput.value, timeInput.value);
+    if (issue) {
+      const msgEl = document.getElementById("scheduleAvailabilityMsg");
+      msgEl.hidden = false;
+      msgEl.className = "location-status error";
+      msgEl.textContent = issue;
+      return;
+    }
     const msg = waScheduleMessage();
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
     dateInput.value = "";
@@ -403,6 +550,7 @@ function initScheduleModal() {
     locationInput.value = "";
     document.getElementById("scheduleName").value = "";
     resetScheduleLocation();
+    document.getElementById("scheduleAvailabilityMsg").hidden = true;
     closeScheduleModal();
   });
 }
@@ -592,3 +740,5 @@ function initLangSwitch() {
 initScheduleModal();
 initLangSwitch();
 setLanguage(currentLang);
+loadAvailability();
+loadApiGalleryImages();

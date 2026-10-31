@@ -202,6 +202,18 @@ const WHATSAPP_NUMBER = "5219987372869"; // formato internacional sin '+' ni esp
 // Mientras carga o si la API no responde, se usa esta disponibilidad por
 // defecto (igual a la que trae la API si nunca la ha configurado).
 const API_BASE = "https://moroludero-catalogos-api.azurewebsites.net";
+
+// Beacon anónimo de analítica para el panel de Ramón — nunca debe romper
+// la experiencia del visitante si falla, por eso el .catch() silencioso.
+function trackEvent(type, entityId, entityName) {
+  fetch(`${API_BASE}/api/analytics/track`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ business: "kintro", type, entityId, entityName }),
+    keepalive: true,
+  }).catch(() => {});
+}
+
 const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 let AVAILABILITY = {
   days: {
@@ -390,6 +402,10 @@ function openScheduleModal(categoryId) {
   modal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
   document.getElementById("scheduleDate").focus();
+  const trackedId = select.value;
+  // Siempre en español (canónico), no en el idioma del visitante — así
+  // "Cocinas Integrales" y "Kitchen Cabinetry" no cuentan como categorías distintas.
+  trackEvent("category_view", trackedId, trackedId === "other" ? I18N.es.scheduleCategoryOther : CATEGORY_I18N[trackedId].es.label);
 }
 
 function closeScheduleModal() {
@@ -545,6 +561,8 @@ function initScheduleModal() {
     }
     const msg = waScheduleMessage();
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
+    const categoryId = document.getElementById("scheduleCategory").value;
+    trackEvent("visit_scheduled", categoryId, categoryId === "other" ? I18N.es.scheduleCategoryOther : CATEGORY_I18N[categoryId].es.label);
     dateInput.value = "";
     document.getElementById("scheduleTime").value = "";
     locationInput.value = "";
